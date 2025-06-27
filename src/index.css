@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+body{
+    font-family: "Inter";
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+.sign-in{
+    background: url("assets/Img/image.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+}
+
+h1 {
+    font-size: 32px;
+    font-weight: bold;
+    
+  }
+
+h2{
+    font-size: 24px;
+    font-weight: bold;
+}
+
+ul, ol {
+    list-style-type: disc; /* or decimal for ordered lists */
+    list-style-position: inside; /* Ensures marker is inside */
+}
+
+
+  
+ol {
+    list-style-type: decimal; /* Numbers for OL */
+}
+
+.ProseMirror {
+    height: 200px;  /* Ensure the content area stretches to fill the height of the parent */
+    overflow-y: auto;
+    outline: none;
+    padding: 16px;
+}
+
+li p{
+    
+    display: inline-block;
+}
