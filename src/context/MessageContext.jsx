@@ -22,6 +22,8 @@ export const MessageProvider = ({ children }) => {
         createdAt: Date.now(),
       });
     });
+
+    return () => socket.current.disconnect();
   }, []);
 
   useEffect(() => {
@@ -31,6 +33,8 @@ export const MessageProvider = ({ children }) => {
   }, [arrivalMessage, currentChat]);
 
   useEffect(() => {
+    if (!user?._id) return;
+
     socket.current.emit('addUser', user._id);
     socket.current.on('getUsers', (users) => {
       console.log(users);
@@ -39,6 +43,8 @@ export const MessageProvider = ({ children }) => {
 
   useEffect(() => {
     const getConversations = async () => {
+      if (!user?._id) return;
+
       try {
         const res = await axios.get('/conversations/' + user._id);
         setConversations(res.data);
@@ -47,12 +53,17 @@ export const MessageProvider = ({ children }) => {
       }
     };
     getConversations();
-  }, [user._id]);
+  }, [user?._id]);
 
   useEffect(() => {
     const getMessages = async () => {
+      if (!currentChat?._id) {
+        setMessages([]);
+        return;
+      }
+
       try {
-        const res = await axios.get('/messages/' + currentChat?._id);
+        const res = await axios.get('/messages/' + currentChat._id);
         setMessages(res.data);
       } catch (err) {
         console.log(err);
@@ -64,9 +75,12 @@ export const MessageProvider = ({ children }) => {
   const handleSubmit = async (e, newMessage) => {
     e.preventDefault();
 
+    const text = newMessage.trim();
+    if (!text || !user?._id || !currentChat?._id) return false;
+
     const message = {
       sender: user._id,
-      text: newMessage,
+      text,
       conversationId: currentChat._id,
     };
 
@@ -74,17 +88,18 @@ export const MessageProvider = ({ children }) => {
       (member) => member !== user._id
     );
 
-    socket.current.emit('sendMessage', {
-      senderId: user._id,
-      receiverId,
-      text: newMessage,
-    });
-
     try {
       const res = await axios.post('/messages', message);
-      setMessages([...messages, res.data]);
+      setMessages((previousMessages) => [...previousMessages, res.data]);
+      socket.current.emit('sendMessage', {
+        senderId: user._id,
+        receiverId,
+        text,
+      });
+      return true;
     } catch (err) {
       console.log(err);
+      return false;
     }
   };
 

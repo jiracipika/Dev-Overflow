@@ -4,16 +4,16 @@ import attachment_icon from '../assets/Images/attach.png';
 
 const MessageInput = () => {
   const [newMessage, setNewMessage] = useState('');
-  const { handleSubmit } = useMessages();
+  const { handleSubmit, currentChat } = useMessages();
+  const canSend = Boolean(currentChat && newMessage.trim());
 
   return (
     <form
-      onSubmit={(e) => {
-        handleSubmit(e, newMessage);
-        setNewMessage('');
+      onSubmit={async (e) => {
+        const sent = await handleSubmit(e, newMessage);
+        if (sent) setNewMessage('');
       }}
       className="h-[50px] bg-[white] p-[10px] flex items-center justify-between"
-      alt="input"
     >
       <div className="flex items-center gap-[10px]">
         <input
@@ -31,12 +31,14 @@ const MessageInput = () => {
         className="flex-1 border-none outline-none text-[#2f2d52] text-[18px] px-[10px]"
         type="text"
         placeholder="Type Something..."
+        aria-label="Message"
         value={newMessage}
         onChange={(e) => setNewMessage(e.target.value)}
       />
 
       <button
         type="submit"
+        disabled={!canSend}
         className="border-none px-[15px] py-2.5 text-[white] bg-[#8da4f1] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Send
