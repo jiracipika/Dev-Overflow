@@ -3,6 +3,7 @@ import TextEditor from '../Components/TextEditor'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FaX } from 'react-icons/fa6'
+import { validateTag } from '../utils/tagInput'
 
 
 
@@ -20,20 +21,15 @@ const AskAQuestion = () => {
   }
 
   const addTag = (e) =>{
-    const tagText = e.target.innerText
-    
-    if(tagText.length > 10){
-      toast.error("The length of the tag should be upto Ten letters");
-      return
+    const result = validateTag(e.target.innerText, tags)
+
+    if (!result.ok) {
+      toast.error(result.error);
+      return;
     }
 
-    if(tags.length >= 5){
-      toast.error("You cannot add tags more than 5");
-    }else{
-      setTags((prevTags) => [...prevTags, tagText]);
-      setTagInputVal("")
-    }
-    console.log(e)
+    setTags((prevTags) => [...prevTags, result.tag]);
+    setTagInputVal("")
   }
 
   const removeTag = (indexToDelete) =>{

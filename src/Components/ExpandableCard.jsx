@@ -2,28 +2,37 @@ import React, { useState, useEffect }  from 'react'
 import { Link } from 'react-router-dom'
 import Tag from './Tag.jsx'
 import { FaThumbsUp, FaComment, FaEye, FaRegStar, FaStar} from 'react-icons/fa6'
+import { addToCollections, removeFromCollections as removeCardFromCollections } from '../utils/collections'
+
+const COLLECTIONS_KEY = 'collections'
+
+const readCollections = () => {
+    try {
+        return JSON.parse(localStorage.getItem(COLLECTIONS_KEY) || '[]')
+    } catch {
+        return []
+    }
+}
 
 const ExpandableCard = ({title, author, asked, votes, comments, views, tags, id, imgSrc}) => {
 
     const [isBookmarked, setIsBookmarked] = useState(false)
 
     useEffect(() => {
-        const savedCollections = JSON.parse(localStorage.getItem('collections') || '[]')
+        const savedCollections = readCollections()
         const isAlreadyBookmarked = savedCollections.some(item => item.id === id)
         setIsBookmarked(isAlreadyBookmarked)
 
     }, [id])
 
     const saveToCollections = (cardData) => {
-        const savedCollections = JSON.parse(localStorage.getItem("collections") || "[]")
-        const updatedCollections = [...savedCollections, cardData]
-        localStorage.setItem('collections', JSON.stringify(updatedCollections))
+        const updatedCollections = addToCollections(readCollections(), cardData)
+        localStorage.setItem(COLLECTIONS_KEY, JSON.stringify(updatedCollections))
     }
 
     const removeFromCollections = (cardId) => {
-        const savedCollections = JSON.parse(localStorage.getItem('collections') || '[]')
-        const updatedCollections = savedCollections.filter(item => item.id !== cardId)
-        localStorage.setItem('collections', JSON.stringify(updatedCollections))
+        const updatedCollections = removeCardFromCollections(readCollections(), cardId)
+        localStorage.setItem(COLLECTIONS_KEY, JSON.stringify(updatedCollections))
     }
 
     const toggleBookmark = () => {
@@ -70,13 +79,13 @@ const ExpandableCard = ({title, author, asked, votes, comments, views, tags, id,
         <div className='flex justify-between'>
             <div className='flex gap-2'>
                 <img className='w-6 h-6 rounded-full' src={imgSrc || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQpuYdLEzBvwemix8pwsncUkLLOQqnByncadg&s"} alt="" />
-                <p className="text-white font-semibold max-[1500px]:text-[14px]">{author || "user"}</p>
-                <span className="text-gray-500 max-[1500px]:text-[14px] max-[1362px]:text-[12px]">• {asked || "Asked 3 minutes ago"}</span>
+                <p className="text-white font-semibold max-[1500px]:text-[14px]">{author ?? "user"}</p>
+                <span className="text-gray-500 max-[1500px]:text-[14px] max-[1362px]:text-[12px]">• {asked ?? ""}</span>
             </div>
             <div className='flex gap-4'>
-                <button className='flex items-center gap-2'><FaThumbsUp  className='text-[#1DA1F2]'/><span className='max-[1418px]:text-[11px]'>Votes {votes || "25" }</span></button>
-                <button className='flex items-center gap-2'><FaComment className='text-[#1DA1F2]'/><span className='max-[1418px]:text-[11px]'>Answers {comments.length || "0" }</span></button>
-                <button className='flex items-center gap-2'><FaEye className='text-[#1DA1F2]'/><span className='max-[1418px]:text-[11px]'>Views {views || "100" }</span></button>
+                <button className='flex items-center gap-2'><FaThumbsUp  className='text-[#1DA1F2]'/><span className='max-[1418px]:text-[11px]'>Votes {votes ?? 0 }</span></button>
+                <button className='flex items-center gap-2'><FaComment className='text-[#1DA1F2]'/><span className='max-[1418px]:text-[11px]'>Answers {comments ? comments.length : 0 }</span></button>
+                <button className='flex items-center gap-2'><FaEye className='text-[#1DA1F2]'/><span className='max-[1418px]:text-[11px]'>Views {views ?? 0 }</span></button>
             </div>
         </div>
     </div>

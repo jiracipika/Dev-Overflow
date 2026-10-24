@@ -1,9 +1,8 @@
-import React, { createContext, useState, useContext, useEffect, useRef } from 'react';
+import React, { useState, useContext, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { io } from 'socket.io-client';
 import axios from '../utils/axios';
-
-const MessageContext = createContext();
+import { MessageContext } from './messageContextBase';
 
 export const MessageProvider = ({ children }) => {
   const { user } = useSelector((state) => state.auth);

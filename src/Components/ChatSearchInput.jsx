@@ -4,11 +4,11 @@ import { useMessages } from '../context/MessageContext'
 
 const ChatSearchInput = () => {
   const [searchTerm, setSearchTerm] = useState('')
-  const { chats, setCurrentChat } = useMessages()
+  const { conversations, setCurrentChat } = useMessages()
 
-  // Filter chats based on search term
-  const filteredChats = chats.filter(chat => 
-    chat.name.toLowerCase().includes(searchTerm.toLowerCase())
+  // Filter conversations based on search term
+  const filteredChats = conversations.filter(chat =>
+    (chat?.name ?? '').toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   const handleChatClick = (chat) => {
@@ -31,7 +31,7 @@ const ChatSearchInput = () => {
       <div className='overflow-y-auto max-h-[200px]'>
         {filteredChats.map((chat) => (
           <div 
-            key={chat.id}
+            key={chat.id ?? chat._id}
             className='p-[10px] flex items-center gap-[10px] text-[#7B8EC8] cursor-pointer hover:bg-[#2f2d52] transition-colors duration-200'
             onClick={() => handleChatClick(chat)}
           >

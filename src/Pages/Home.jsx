@@ -5,100 +5,24 @@ import SearchInput from '../Components/SearchInput';
 import FilterQuestionTab from '../Components/FilterQuestionTab';
 import articles from '../assets/FakeData.js'
 import ExpandableCard from '../Components/ExpandableCard.jsx';
-import { useSelector } from 'react-redux';
+import { applyFeedFilters } from '../utils/questionFeed';
 
 const Home = () => {
-  const auth = useSelector((state) => state.auth)
-  console.log("auth from the home page ", auth)
   const [searchQuery,setSearchQuery] = useState("")
   const [filterQuery, setFilterQuery] = useState("Newest")
   const [itemsToShow, setItemsToShow] = useState(5)
   const [filteredArticles, setFilteredArticles] = useState(articles)
 
-  // Helper function to convert time strings to minutes
-  const parseTimeToMinutes = (timeString) => {
-
-    // Handle special case for "Just Now"
-    if (timeString.toLowerCase() === "just now") {
-      return 0;
-    }
-
-    // Try to match the pattern "number unit"
-    const matches = timeString.match(/(\d+)\s+(\w+)/);
-    if (!matches) {
-      console.warn('Invalid time format:', timeString);
-      return 0;
-    }
-
-    const number = matches[1];
-    const unit = matches[2].toLowerCase();
-
-     // Create a map of unit multipliers
-     const unitMultipliers = {
-      'minutes': 1,
-      'minute': 1,
-      'hours': 60,
-      'hour': 60,
-      'days': 24 * 60,
-      'day': 24 * 60
-    }
-
-    const multiplier = unitMultipliers[unit] || 1;
-    const num = parseInt(number);
-
-    return num * multiplier;
-  }
-
   const handleSearch = (userquery) => {
     setSearchQuery(userquery)
-    console.log(userquery)
-
-    // Filter articles based on search query
-    const filtered = articles.filter(article => {
-      const searchLower = userquery.toLowerCase()
-      const titleMatch = article.title.toLowerCase().includes(searchLower)
-      const contentMatch = article.content.toLowerCase().includes(searchLower)
-      const tagsMatch = article.tags.some(tag => tag.toLowerCase().includes(searchLower))
-      return titleMatch || contentMatch || tagsMatch
-    })
-
-    setFilteredArticles(filtered)
+    setItemsToShow(5)
+    setFilteredArticles(applyFeedFilters(articles, { searchQuery: userquery, filter: filterQuery }))
   }
 
   const handleFilterChosen = (userquery) => {
     setFilterQuery(userquery)
-    console.log(userquery)
-
-    // If there's a search query, keep it filtered
-    if (searchQuery) {
-      const filtered = articles.filter(article => {
-        const searchLower = searchQuery.toLowerCase()
-        const titleMatch = article.title.toLowerCase().includes(searchLower)
-        const contentMatch = article.content.toLowerCase().includes(searchLower)
-        const tagsMatch = article.tags.some(tag => tag.toLowerCase().includes(searchLower))
-        return titleMatch || contentMatch || tagsMatch
-      })
-      setFilteredArticles(filtered)
-      return
-    }
-
-    if (userquery === "Newest") {
-      const sortedArticles = [...articles].sort((a, b) => {
-        const timeA = parseTimeToMinutes(a.asked)
-        const timeB = parseTimeToMinutes(b.asked)
-        return timeA - timeB
-      })
-      setFilteredArticles(sortedArticles)
-    }
-    else if (userquery === "Recommended") {
-      setFilteredArticles(articles.sort((a, b) => b.votes - a.votes))
-    }
-    else if (userquery === "Frequent") {
-      setFilteredArticles(articles.sort((a, b) => b.views - a.views))
-    }
-    else if (userquery === "Unanswered") {
-      setFilteredArticles(articles.filter(article => article.comments.length === 0))
-    }
+    setItemsToShow(5)
+    setFilteredArticles(applyFeedFilters(articles, { searchQuery, filter: userquery }))
   }
 
   const handleShowMore = () => {
